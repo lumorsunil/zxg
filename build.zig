@@ -22,7 +22,7 @@ pub fn build(b: *std.Build) void {
     });
 
     const zxgModule = b.addModule("zxg", .{
-        .root_source_file = b.path("src/renderer.zig"),
+        .root_source_file = b.path("src/zxg.zig"),
         .target = target,
         .optimize = optimize,
     });

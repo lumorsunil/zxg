@@ -1,5 +1,5 @@
 .{
-    .name = "clay-xml",
+    .name = "zxg",
     .version = "0.0.0",
     .dependencies = .{
         .@"clay-zig" = .{

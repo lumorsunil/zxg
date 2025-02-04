@@ -65,7 +65,7 @@ pub const XmlGenParser = struct {
     pub fn xmlGen(self: *XmlGenParser) !void {
         const document = try self.pushDocument(self.fileName);
 
-        if (!std.mem.eql(u8, document.root.tag_name.slice(), "clay")) {
+        if (!std.mem.eql(u8, document.root.tag_name.slice(), "zxg")) {
             return XmlGenError.InvalidRootElement;
         }
 

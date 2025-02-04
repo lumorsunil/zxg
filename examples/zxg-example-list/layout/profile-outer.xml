@@ -1,4 +1,4 @@
-<clay>
+<zxg>
   <zig>fn ProfileOuter(frameArenaAllocator: Allocator, text: []const u8) !void {</zig>
     <container
       id="ProfileOuter"
@@ -15,4 +15,4 @@
       >
     </container>
   <zig>}</zig>
-</clay>
+</zxg>

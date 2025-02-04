@@ -1,7 +1,7 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const generated = @import("generated-layout");
-const ZXGApp = @import("renderer.zig").ZXGApp;
+const ZXGApp = @import("zxg").ZXGApp;
 
 const Context = struct {
     allocator: Allocator,

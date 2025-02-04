@@ -88,9 +88,6 @@ pub fn setup(self: *ZXGBuild, exe: *Compile) void {
     exe.linkLibrary(self.clayDep.artifact("clay"));
     generatedLayoutModule.addImport("raylib", self.raylibDep.module("raylib"));
     generatedLayoutModule.addImport("clay", self.clayDep.module("clay"));
-    generatedLayoutModule.addAnonymousImport("lib", .{
-        .root_source_file = self.targetBuild.path("generated-lib/lib.zig"),
-    });
     exe.root_module.addImport("clay", self.clayDep.module("clay"));
 
     const cl = @import("clay-zig");
