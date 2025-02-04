@@ -1,0 +1,30 @@
+.{
+    .name = "clay-xml",
+    .version = "0.0.0",
+    .dependencies = .{
+        .@"clay-zig" = .{
+            .url = "https://github.com/raugl/clay-zig/archive/23dfdafed20ad83189b8372c4c1d61d6a8d5e5f7.zip",
+            .hash = "1220c810bbb8e6aeb37f43953a12baf6acc437163c88500ee91cc47867e9c672b8e9",
+        },
+        .@"raylib-zig" = .{
+            .url = "https://github.com/Not-Nik/raylib-zig/archive/de8c2d458516fc971f0859c4473e3381767d2471.zip",
+            .hash = "122058d3ea6318efb819d0bffba630afd1a459fa3a99b4bfe4b680a937d5de04d2fc",
+        },
+        .mustache = .{
+            .url = "https://github.com/batiati/mustache-zig/archive/5f609d0158f6c5635328ae603b38c351aa15b121.zip",
+            .hash = "12205cc30ed18ea297284eb815e8b5dfa61b57f22ab53762c78a20c042027c05c056",
+        },
+        .uuid = .{
+            .url = "https://github.com/r4gus/uuid-zig/archive/refs/tags/0.2.1.zip",
+            .hash = "1220b4deeb4ec1ec3493ea934905356384561b725dba69d1fbf6a25cb398716dd05b",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "tools",
+        "build",
+        "config",
+    },
+}

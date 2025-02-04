@@ -1,0 +1,18 @@
+<clay>
+  <zig>fn ProfileOuter(frameArenaAllocator: Allocator, text: []const u8) !void {</zig>
+    <container
+      id="ProfileOuter"
+      sizing="grow 88"
+      padding="16"
+      child-gap="16"
+      alignment="left-center"
+      color="${COLORS.BLUE}"
+      on-pointer-over="onPointerOverProfileOuter"
+    >
+      <element sizing="60 60" color="225 138 50 255" />
+      <text font-size="24" text-color="255, 255, 255, 255"
+          >${text}</text
+      >
+    </container>
+  <zig>}</zig>
+</clay>
