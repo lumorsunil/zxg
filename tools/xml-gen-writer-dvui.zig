@@ -3,49 +3,31 @@ const xml = @import("zig-xml/mod.zig");
 const uuid = @import("uuid");
 const InterpolationTokenizer = @import("interpolation-tokenizer.zig").InterpolationTokenizer;
 const XmlGenError = @import("xml-gen-error.zig").XmlGenError;
+const ZigWriter = @import("zig-writer.zig").ZigWriter;
 
-pub const XmlGenWriter = struct {
+pub const XmlGenWriterDvui = struct {
     indentation: usize,
-    writer: std.fs.File.Writer,
+    writer: ZigWriter,
+    varNameIndex: usize = 0,
 
     const TAB_WIDTH = 4;
 
-    pub fn init(writer: std.fs.File.Writer) XmlGenWriter {
-        return XmlGenWriter{
+    pub fn init(writer: std.fs.File.Writer) XmlGenWriterDvui {
+        return XmlGenWriterDvui{
             .indentation = 0,
-            .writer = writer,
+            .writer = ZigWriter.init(writer),
         };
     }
 
-    pub fn setIndentation(self: *XmlGenWriter, indentation: usize) void {
-        self.indentation = indentation;
-    }
-
-    pub fn incIndentation(self: *XmlGenWriter) void {
-        self.indentation += 1;
-    }
-
-    pub fn decIndentation(self: *XmlGenWriter) void {
-        self.indentation -= 1;
-    }
-
-    fn printIndentation(self: XmlGenWriter) !void {
-        for (0..self.indentation * TAB_WIDTH) |_| {
-            try self.writer.print(" ", .{});
-        }
-    }
-
-    pub fn print(self: XmlGenWriter, comptime fmt: []const u8, args: anytype) !void {
-        try self.printIndentation();
+    pub fn print(self: *XmlGenWriterDvui, comptime fmt: []const u8, args: anytype) !void {
         try self.writer.print(fmt, args);
     }
 
-    pub fn writeAll(self: XmlGenWriter, s: []const u8) !void {
-        try self.printIndentation();
+    pub fn writeAll(self: *XmlGenWriterDvui, s: []const u8) !void {
         try self.writer.writeAll(s);
     }
 
-    pub fn printRaw(self: XmlGenWriter, comptime fmt: []const u8, args: anytype) !void {
+    pub fn printRaw(self: *XmlGenWriterDvui, comptime fmt: []const u8, args: anytype) !void {
         var buffer: [1024 * 4]u8 = undefined;
         const result = try std.fmt.bufPrint(&buffer, fmt, args);
         var it = std.mem.splitScalar(u8, result, '\n');
@@ -57,19 +39,102 @@ pub const XmlGenWriter = struct {
         }
     }
 
-    pub fn printHeader(self: XmlGenWriter) !void {
-        try self.writeAll("const std = @import(\"std\");\n");
-        try self.writeAll("const Allocator = std.mem.Allocator;\n");
-        try self.writeAll("const clay = @import(\"clay\");\n\n");
-        try self.writeAll("const rl = @import(\"raylib\");\n\n");
-        try self.xmlGenPrintConverterUtilStruct();
+    pub fn writeHeader(self: *XmlGenWriterDvui) !void {
+        try self.writer.simpleImport("std", "std");
+        try self.writer.simpleConst("Allocator", "std.mem.Allocator");
+        try self.writer.simpleImport("dvui", "dvui");
+        //try self.xmlGenPrintConverterUtilStruct();
     }
 
-    fn xmlGenPrintConverterUtilStruct(self: XmlGenWriter) !void {
+    fn xmlGenPrintConverterUtilStruct(self: *XmlGenWriterDvui) !void {
         try self.writeAll(@embedFile("./converter.zig"));
     }
 
-    pub fn printValue(self: XmlGenWriter, comptime T: type, value: []const u8) !void {
+    //fn dvui_frame_basic() !void {
+    //    var tl = try dvui.textLayout(@src(), .{}, .{ .expand = .horizontal, .font_style = .title_4 });
+    //    try tl.addText("Hello, world.", .{});
+    //    tl.deinit();
+    //}
+
+    pub fn writeStartLayoutFunction(self: *XmlGenWriterDvui, name: []const u8) !void {
+        try self.writer.beginFunction(name, .{ .isPublic = true }, &.{}, "!void");
+    }
+
+    pub fn writeEndLayoutFunction(self: *XmlGenWriterDvui) !void {
+        try self.writer.endFunction();
+    }
+
+    pub fn newHandle(self: *XmlGenWriterDvui) usize {
+        const handle = self.varNameIndex;
+        self.varNameIndex += 1;
+        return handle;
+    }
+
+    pub inline fn makeVarName(
+        self: *XmlGenWriterDvui,
+        comptime prefix: []const u8,
+        handle: usize,
+    ) ![]const u8 {
+        _ = self; // autofix
+        var varNameBuffer: [16]u8 = undefined;
+        return try std.fmt.bufPrint(&varNameBuffer, prefix ++ "_{d}", .{handle});
+    }
+
+    pub fn writeText(self: *XmlGenWriterDvui, value: []const u8) !void {
+        self.writeStartText();
+        self.writeTextValue(value);
+        self.writeEndText();
+    }
+
+    pub fn writeStartText(self: *XmlGenWriterDvui) !usize {
+        const handle = self.newHandle();
+        try self.writer.beginBlock(.{});
+        const tlVarName = try self.makeVarName("tl", handle);
+        try self.writer.beginConst(tlVarName, .{});
+        try self.writer.writeTry();
+        try self.writer.writeFunctionCall("dvui.textLayout", "@src(), .{}, .{}");
+        try self.writer.endConst();
+        try self.writer.deinitCall(tlVarName, "", .{ .isDefer = true });
+        const textVarName = try self.makeVarName("text", handle);
+        try self.writer.beginConst(textVarName, .{});
+        return handle;
+    }
+
+    pub fn writeTextValue(self: *XmlGenWriterDvui, value: []const u8) !void {
+        try self.writer.writeAllInline(value);
+    }
+
+    pub fn writeEndText(self: *XmlGenWriterDvui, handle: usize) !void {
+        try self.writer.endConst();
+        const tlVarName = try self.makeVarName("tl", handle);
+        const textVarName = try self.makeVarName("text", handle);
+        try self.writer.beginStatement(.{ .isTry = true });
+        try self.writer.writeAllInline(tlVarName);
+        var argsBuffer: [256]u8 = undefined;
+        const args = try std.fmt.bufPrint(&argsBuffer, "{s}, .{{}}", .{textVarName});
+        try self.writer.writeFunctionCall(".addText", args);
+        try self.writer.endStatement(.FunctionCall);
+        try self.writer.endBlock(.{});
+    }
+
+    pub fn writeBeginBox(self: *XmlGenWriterDvui, direction: []const u8, options: []const u8) !void {
+        const handle = self.newHandle();
+        const boxVarName = try self.makeVarName("box", handle);
+        try self.writer.beginBlock(.{});
+        try self.writer.beginConst(boxVarName, .{});
+        try self.writer.writeTry();
+        var argsBuffer: [256]u8 = undefined;
+        const args = try std.fmt.bufPrint(&argsBuffer, "@src(), {s}, {s}", .{ direction, options });
+        try self.writer.writeFunctionCall("dvui.box", args);
+        try self.writer.endConst();
+        try self.writer.deinitCall(boxVarName, "", .{ .isDefer = true });
+    }
+
+    pub fn writeEndBox(self: *XmlGenWriterDvui) !void {
+        try self.writer.endBlock(.{});
+    }
+
+    pub fn writeValue(self: *XmlGenWriterDvui, comptime T: type, value: []const u8) !void {
         var tokenizer = InterpolationTokenizer.init(value);
 
         if (tokenizer.hasInterpolation()) {
@@ -96,30 +161,28 @@ pub const XmlGenWriter = struct {
             }
         } else {
             switch (T) {
-                []const u8 => try self.writer.print("\"{s}\"", .{value}),
-                else => try self.writer.print("try Converter.convert(" ++ @typeName(T) ++ ", frameArenaAllocator, {s})", .{value}),
+                []const u8 => try self.writer.printInline("\"{s}\"", .{value}),
+                else => try self.writer.printInline("try Converter.convert(" ++ @typeName(T) ++ ", frameArenaAllocator, {s})", .{value}),
             }
         }
     }
 
-    pub fn printId(self: XmlGenWriter, node: xml.Element) !void {
+    pub fn printId(self: *XmlGenWriterDvui, node: xml.Element) !void {
         const id = node.attr("id") orelse &uuid.urn.serialize(uuid.v4.new());
         try self.print(".id = clay.Id(", .{});
-        try self.printValue([]const u8, id);
+        try self.writeValue([]const u8, id);
         try self.writer.print("),\n", .{});
     }
 
-    pub fn printBeginLayout(self: *XmlGenWriter) !void {
+    pub fn printBeginLayout(self: *XmlGenWriterDvui) !void {
         try self.print(".layout = .{{\n", .{});
-        self.incIndentation();
     }
 
-    pub fn printEndLayout(self: *XmlGenWriter) !void {
-        self.decIndentation();
+    pub fn printEndLayout(self: *XmlGenWriterDvui) !void {
         try self.print("}},\n", .{});
     }
 
-    pub fn printSizing(self: XmlGenWriter, node: xml.Element) !void {
+    pub fn printSizing(self: *XmlGenWriterDvui, node: xml.Element) !void {
         const value = node.attr("sizing").?;
         if (std.mem.eql(u8, value, "grow")) {
             try self.print(".sizing = clay.Sizing.grow,\n", .{});
@@ -141,7 +204,7 @@ pub const XmlGenWriter = struct {
         }
     }
 
-    fn printSizingAxis(self: XmlGenWriter, value: []const u8) !void {
+    fn printSizingAxis(self: *XmlGenWriterDvui, value: []const u8) !void {
         if (std.mem.eql(u8, value, "grow")) {
             try self.writer.print("clay.SizingAxis.grow", .{});
         } else if (std.mem.eql(u8, value, "fit")) {
@@ -155,7 +218,7 @@ pub const XmlGenWriter = struct {
         }
     }
 
-    pub fn printPadding(self: XmlGenWriter, node: xml.Element) !void {
+    pub fn printPadding(self: *XmlGenWriterDvui, node: xml.Element) !void {
         const value = node.attr("padding").?;
         var it = std.mem.splitScalar(u8, value, ' ');
         var x: u16 = 0;
@@ -179,12 +242,12 @@ pub const XmlGenWriter = struct {
         try self.print(".padding = .{{ .x = {d}, .y = {d} }},\n", .{ x, y });
     }
 
-    pub fn printChildGap(self: XmlGenWriter, node: xml.Element) !void {
+    pub fn printChildGap(self: *XmlGenWriterDvui, node: xml.Element) !void {
         const value = node.attr("child-gap").?;
         try self.print(".child_gap = {s},\n", .{value});
     }
 
-    pub fn printDirection(self: XmlGenWriter, node: xml.Element) !void {
+    pub fn printDirection(self: *XmlGenWriterDvui, node: xml.Element) !void {
         const value = node.attr("direction").?;
         if (std.mem.eql(u8, value, "top-to-bottom")) {
             try self.print(".direction = .top_to_bottom,\n", .{});
@@ -193,7 +256,7 @@ pub const XmlGenWriter = struct {
         }
     }
 
-    pub fn printAlignment(self: XmlGenWriter, node: xml.Element) !void {
+    pub fn printAlignment(self: *XmlGenWriterDvui, node: xml.Element) !void {
         const value = node.attr("alignment").?;
 
         if (std.mem.eql(u8, value, "left-top")) {
@@ -217,13 +280,11 @@ pub const XmlGenWriter = struct {
         }
     }
 
-    pub fn printBeginRectangle(self: *XmlGenWriter) !void {
+    pub fn printBeginRectangle(self: *XmlGenWriterDvui) !void {
         try self.writeAll(".rectangle = .{\n");
-        self.incIndentation();
     }
 
-    pub fn printEndRectangle(self: *XmlGenWriter) !void {
-        self.decIndentation();
+    pub fn printEndRectangle(self: *XmlGenWriterDvui) !void {
         try self.writeAll("},\n");
     }
 
@@ -252,7 +313,7 @@ pub const XmlGenWriter = struct {
         }
     }
 
-    pub fn printColor(self: XmlGenWriter, node: xml.Element) !void {
+    pub fn printColor(self: *XmlGenWriterDvui, node: xml.Element) !void {
         const value = node.attr("color").?;
 
         switch (getColorFormat(value)) {
@@ -261,7 +322,7 @@ pub const XmlGenWriter = struct {
         }
     }
 
-    fn printColorRGBA(self: XmlGenWriter, value: []const u8) !void {
+    fn printColorRGBA(self: *XmlGenWriterDvui, value: []const u8) !void {
         try self.writeAll(".color = clay.Color.init(");
         var tokenizer = InterpolationTokenizer.init(value);
 
@@ -272,12 +333,12 @@ pub const XmlGenWriter = struct {
                         var it = std.mem.splitScalar(u8, text, ' ');
                         while (it.next()) |p| {
                             if (p.len == 0) continue;
-                            try self.printValue(u8, p);
+                            try self.writeValue(u8, p);
                             try self.writer.writeAll(", ");
                         }
                     },
                     .interpolation => |interp| {
-                        try self.printValue(u8, interp);
+                        try self.writeValue(u8, interp);
                         try self.writer.writeAll(", ");
                     },
                 }
@@ -285,14 +346,14 @@ pub const XmlGenWriter = struct {
         } else {
             var it = std.mem.splitScalar(u8, value, ' ');
             while (it.next()) |p| {
-                try self.printValue(u8, p);
+                try self.writeValue(u8, p);
                 try self.writer.writeAll(", ");
             }
         }
         try self.writer.writeAll("),\n");
     }
 
-    fn printColorTuple(self: XmlGenWriter, value: []const u8) !void {
+    fn printColorTuple(self: *XmlGenWriterDvui, value: []const u8) !void {
         try self.writeAll(".color = try Converter.convert(clay.Color, frameArenaAllocator, ");
         var tokenizer = InterpolationTokenizer.init(value);
         var numberOfTokens: usize = 0;

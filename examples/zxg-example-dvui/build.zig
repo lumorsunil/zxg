@@ -1,5 +1,4 @@
 const std = @import("std");
-
 const zxg = @import("zxg");
 
 pub fn build(b: *std.Build) void {
@@ -7,7 +6,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const exe = b.addExecutable(.{
-        .name = "zxg-example-basic",
+        .name = "zxg-example-dvui",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
@@ -18,7 +17,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .layoutPath = "layout.xml",
         .generatedLayoutImport = "generated-layout",
-        .backend = .Clay,
+        .backend = .Dvui,
     });
 
     b.installArtifact(exe);

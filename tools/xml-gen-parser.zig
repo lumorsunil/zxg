@@ -70,11 +70,7 @@ pub const XmlGenParser = struct {
         }
 
         try self.xmlWriter.print("// {s}\n\n", .{self.fileName});
-        try self.xmlWriter.writeAll("const std = @import(\"std\");\n");
-        try self.xmlWriter.writeAll("const Allocator = std.mem.Allocator;\n");
-        try self.xmlWriter.writeAll("const clay = @import(\"clay\");\n\n");
-        try self.xmlWriter.writeAll("const rl = @import(\"raylib\");\n\n");
-        try self.xmlGenPrintConverterUtilStruct();
+        try self.xmlWriter.printHeader();
         try self.xmlGenTagName("head", document.root.children());
         try self.xmlWriter.writeAll("pub fn layout(allocator: Allocator, context: anytype) !std.meta.Tuple(&.{ clay.RenderCommandArray, std.heap.ArenaAllocator }) {\n");
         self.xmlWriter.incIndentation();
@@ -124,10 +120,6 @@ pub const XmlGenParser = struct {
         try self.xmlGenTextBegin();
         try self.xmlGenTextString(text);
         try self.xmlGenTextEnd(defaultFontSize, defaultTextColor);
-    }
-
-    fn xmlGenPrintConverterUtilStruct(self: *XmlGenParser) !void {
-        try self.xmlWriter.writeAll(@embedFile("./converter.zig"));
     }
 
     fn isTagName(node: xml.Element, tagName: []const u8) bool {

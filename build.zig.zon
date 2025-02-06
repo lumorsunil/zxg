@@ -18,6 +18,18 @@
             .url = "https://github.com/r4gus/uuid-zig/archive/refs/tags/0.2.1.zip",
             .hash = "1220b4deeb4ec1ec3493ea934905356384561b725dba69d1fbf6a25cb398716dd05b",
         },
+        .dvui = .{
+            .url = "https://github.com/david-vanderson/dvui/archive/refs/tags/v0.2.0.zip",
+            .hash = "122044e22bc953f8f4653110dcb702653bdd4d43c2284e2868d8ba7c3290dab2bdaf",
+        },
+        .zgui = .{
+            .url = "https://github.com/zig-gamedev/zgui/archive/c16629e67e7bc1bca9a5c67d5123874c75f5374d.zip",
+            .hash = "12202063c813c1b95affa57d83a6a4817d9a4114bd9db052f87740f81b1843ceca09",
+        },
+        .rlimgui = .{
+            .url = "https://github.com/raylib-extras/rlImGui/archive/57efef06f69b50ed9ac0834a963a8aefcc59d588.zip",
+            .hash = "1220062a93086ea393994481df6555bb31c3bc4604b9feb21a2f89e5c396a865ee25",
+        },
     },
     .paths = .{
         "build.zig",

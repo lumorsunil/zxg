@@ -12,17 +12,13 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const zxgDep = b.dependency("zxg", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    zxg.setup(zxgDep.builder, b, exe, .{
+    zxg.setup(b, exe, .{
         .target = target,
         .optimize = optimize,
         .layoutPath = "layout.xml",
         .generatedLayoutImport = "generated-layout",
+        .backend = .Clay,
     });
-    exe.root_module.addImport("zxg", zxgDep.module("zxg"));
 
     b.installArtifact(exe);
 

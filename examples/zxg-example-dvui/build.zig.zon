@@ -1,0 +1,14 @@
+.{
+    .name = "zxg-example-dvui",
+    .version = "0.0.0",
+    .dependencies = .{
+        .zxg = .{
+            .path = "../../",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}

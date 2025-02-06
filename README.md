@@ -8,6 +8,8 @@ The backend uses [Clay](https://github.com/nicbarker/clay) and [Raylib](https://
 
 zxg also uses [zig-xml](https://github.com/nektro/zig-xml) for parsing the XML.
 
+I'm in the process of adding support for [dvui](https://github.com/david-vanderson/dvui/tree/v0.2.0) as a backend.
+
 ## Basic Example
 
 ### Screenshot
@@ -63,17 +65,12 @@ fn build(b: *std.Build) void {
 
     ...
 
-    const zxgDep = b.dependency("zxg", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    exe.root_module.addImport("zxg", zxgDep.module("zxg"));
-
     zxg.setup(zxgDep.builder, b, exe, .{
         .target = target,
         .optimize = optimize,
         .layoutPath = "layout.xml",
         .generatedLayoutImport = "generated-layout",
+        .backend = .Clay,
     });
 
     ...
