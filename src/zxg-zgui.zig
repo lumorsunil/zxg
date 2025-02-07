@@ -44,14 +44,13 @@ pub const ZXGZguiApp = struct {
     }
 
     pub fn run(self: *ZXGZguiApp, comptime layoutFn: anytype, context: anytype) !void {
-        _ = context; // autofix
-        _ = layoutFn; // autofix
         try self.alloc();
 
         while (!rl.windowShouldClose()) {
             rl.beginDrawing();
             rl.clearBackground(rl.Color.white);
             //const renderCommands, const renderArena = try layoutFn(self.allocator, context);
+            try layoutFn(context);
             rl.endDrawing();
         }
     }

@@ -3,14 +3,14 @@ const Allocator = std.mem.Allocator;
 const uuid = @import("uuid");
 const xml = @import("zig-xml/mod.zig");
 const XmlGenError = @import("xml-gen-error.zig").XmlGenError;
-const XmlGenWriterDvui = @import("xml-gen-writer-dvui.zig").XmlGenWriterDvui;
+const XmlGenWriter = @import("xml-gen-writer-zgui.zig").XmlGenWriterZgui;
 const InterpolationTokenizer = @import("interpolation-tokenizer.zig").InterpolationTokenizer;
 
 pub const XmlGenParserZgui = struct {
     allocator: Allocator,
     fileName: []const u8,
     writer: std.fs.File.Writer,
-    xmlWriter: XmlGenWriterDvui,
+    xmlWriter: XmlGenWriter,
     documents: std.StringHashMap(xml.Document),
     documentStack: std.ArrayList(*xml.Document),
 
@@ -19,7 +19,7 @@ pub const XmlGenParserZgui = struct {
             .allocator = allocator,
             .fileName = fileName,
             .writer = writer,
-            .xmlWriter = XmlGenWriterDvui.init(writer),
+            .xmlWriter = XmlGenWriter.init(writer),
             .documents = std.StringHashMap(xml.Document).init(allocator),
             .documentStack = std.ArrayList(*xml.Document).init(allocator),
         };

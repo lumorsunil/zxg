@@ -27,54 +27,54 @@ pub const ZXGBuildInitOptions = struct {
 b: *std.Build,
 targetBuild: *std.Build,
 options: ZXGBuildInitOptions,
-mustacheGen: *Compile,
+//mustacheGen: *Compile,
 xmlGen: *Compile,
-mustacheDep: *Dependency,
-clayDep: *Dependency,
-raylibDep: *Dependency,
-dvuiDep: *Dependency,
-zguiDep: *Dependency,
-rlimguiDep: *Dependency,
-uuidDep: *Dependency,
+mustacheDep: *Dependency = undefined,
+clayDep: *Dependency = undefined,
+raylibDep: *Dependency = undefined,
+dvuiDep: *Dependency = undefined,
+zguiDep: *Dependency = undefined,
+rlimguiDep: *Dependency = undefined,
+uuidDep: *Dependency = undefined,
 
 pub fn init(b: *std.Build, targetBuild: *std.Build, options: ZXGBuildInitOptions) ZXGBuild {
     return ZXGBuild{
         .b = b,
         .targetBuild = targetBuild,
         .options = options,
-        .mustacheGen = b.addExecutable(.{
-            .name = "mustache-gen",
-            .root_source_file = b.path("tools/mustache-gen.zig"),
-            .target = b.host,
-        }),
+        //        .mustacheGen = b.addExecutable(.{
+        //            .name = "mustache-gen",
+        //            .root_source_file = b.path("tools/mustache-gen.zig"),
+        //            .target = b.host,
+        //        }),
         .xmlGen = b.addExecutable(.{
             .name = "xml-gen",
             .root_source_file = b.path("tools/xml-gen.zig"),
             .target = b.host,
         }),
-        .mustacheDep = b.dependency("mustache", .{
-            .target = b.host,
-        }),
-        .clayDep = b.dependency("clay-zig", .{
+        //        .mustacheDep = b.dependency("mustache", .{
+        //            .target = b.host,
+        //        }),
+        .clayDep = if (options.backend == .Clay) b.dependency("clay-zig", .{
             .target = options.target,
             .optimize = options.optimize,
-        }),
+        }) else undefined,
         .raylibDep = b.dependency("raylib-zig", .{
             .target = options.target,
             .optimize = options.optimize,
         }),
-        .dvuiDep = b.dependency("dvui", .{
+        .dvuiDep = if (options.backend == .Dvui) b.dependency("dvui", .{
             .target = options.target,
             .optimize = options.optimize,
-        }),
-        .zguiDep = b.dependency("zgui", .{
+        }) else undefined,
+        .zguiDep = if (options.backend == .Zgui) b.dependency("zgui", .{
             .target = options.target,
             .optimize = options.optimize,
-        }),
-        .rlimguiDep = b.dependency("rlimgui", .{
+        }) else undefined,
+        .rlimguiDep = if (options.backend == .Zgui) b.dependency("rlimgui", .{
             .target = options.target,
             .optimize = options.optimize,
-        }),
+        }) else undefined,
         .uuidDep = b.dependency("uuid", .{
             .target = options.target,
             .optimize = options.optimize,
@@ -118,7 +118,7 @@ const SetupBackendOptions = struct {
 };
 
 pub fn setupBackend(self: *ZXGBuild, module: *Module, options: SetupBackendOptions) void {
-    if (options.includeArtifacts) module.linkLibrary(self.raylibDep.artifact("raylib"));
+    module.linkLibrary(self.raylibDep.artifact("raylib"));
     module.addImport("raylib", self.raylibModule());
     module.addImport("raygui", self.raylibGuiModule());
 
@@ -140,15 +140,17 @@ pub fn setupBackend(self: *ZXGBuild, module: *Module, options: SetupBackendOptio
             }
             module.addImport("zgui", self.zguiModule());
             module.addIncludePath(self.zguiDep.path("libs/imgui"));
-            module.addCSourceFile(.{
-                .file = self.rlimguiDep.path("rlImGui.cpp"),
-                .flags = &.{
-                    "-fno-sanitize=undefined",
-                    "-std=c++11",
-                    "-Wno-deprecated-declarations",
-                    "-DNO_FONT_AWESOME",
-                },
-            });
+            if (options.includeArtifacts and options.linkLibCpp) {
+                module.addCSourceFile(.{
+                    .file = self.rlimguiDep.path("rlImGui.cpp"),
+                    .flags = &.{
+                        "-fno-sanitize=undefined",
+                        "-std=c++11",
+                        "-Wno-deprecated-declarations",
+                        "-DNO_FONT_AWESOME",
+                    },
+                });
+            }
             module.addIncludePath(self.rlimguiDep.path("."));
         },
         .NotSpecified => {},
@@ -174,14 +176,14 @@ fn createGeneratedLayoutModule(self: *ZXGBuild, xmlGen_output: LazyPath) *Module
         .optimize = self.options.optimize,
     });
 
-    self.setupBackend(generatedLayoutModule, .{ .includeArtifacts = true, .linkLibCpp = false });
+    self.setupBackend(generatedLayoutModule, .{ .includeArtifacts = false, .linkLibCpp = false });
 
     return generatedLayoutModule;
 }
 
 fn exeLinkAndAddImports(self: *ZXGBuild, exe: *Compile, generatedLayoutModule: *Module) void {
     exe.root_module.addImport(self.options.generatedLayoutImport, generatedLayoutModule);
-    self.setupBackend(&exe.root_module, .{ .includeArtifacts = true, .linkLibCpp = true });
+    self.setupBackend(&exe.root_module, .{ .includeArtifacts = true, .linkLibCpp = false });
 }
 
 pub fn setup(self: *ZXGBuild, exe: *Compile) void {
@@ -199,7 +201,7 @@ pub fn setup(self: *ZXGBuild, exe: *Compile) void {
         .backend = self.options.backend,
     });
     const zxgModule = zxgDep.module("zxg");
-    self.setupBackend(zxgModule, .{ .includeArtifacts = true, .linkLibCpp = false });
+    self.setupBackend(zxgModule, .{ .includeArtifacts = true, .linkLibCpp = true });
     exe.root_module.addImport("zxg", zxgModule);
 
     self.setupNonMainZxgStuff(exe);

@@ -1,6 +1,7 @@
 const std = @import("std");
 const zxg = @import("zxg");
 const layout = @import("generated-layout").layout;
+const Context = @import("context.zig").Context;
 
 pub fn main() !void {
     var app = zxg.ZXGApp.init(1024, 800, "zxg zgui example");

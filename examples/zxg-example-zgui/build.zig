@@ -12,6 +12,13 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const nfdDep = b.dependency("nfd-zig", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    const nfdModule = nfdDep.module("nfd");
+    exe.root_module.addImport("nfd", nfdModule);
+
     zxg.setup(b, exe, .{
         .target = target,
         .optimize = optimize,

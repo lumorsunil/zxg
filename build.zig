@@ -55,31 +55,22 @@ pub fn build(b: *std.Build) void {
     zxgModuleBackendOptions.addOption(ZXGBackend, "backend", backend);
     zxgModule.addOptions("backend", zxgModuleBackendOptions);
 
-    const zxgClayModule = b.addModule("zxg-clay", .{
-        .root_source_file = b.path("src/zxg-clay.zig"),
+    var zxgBuild = getZXGBuild(b, backend, extraOptions);
+    const implName = switch (backend) {
+        .Clay => "clay",
+        .Dvui => "dvui",
+        .Zgui => "zgui",
+        .NotSpecified => {
+            std.log.err("backend not specified", .{});
+            std.process.exit(1);
+        },
+    };
+
+    const implModule = b.addModule("zxg-" ++ implName, .{
+        .root_source_file = b.path("src/zxg-" ++ implName ++ ".zig"),
         .target = target,
         .optimize = optimize,
     });
-    var zxgClayBuild = getZXGBuild(b, .Clay, extraOptions);
-    zxgClayBuild.setupBackend(zxgClayModule, .{ .includeArtifacts = true, .linkLibCpp = false });
-
-    const zxgDvuiModule = b.addModule("zxg-dvui", .{
-        .root_source_file = b.path("src/zxg-dvui.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    var zxgDvuiBuild = getZXGBuild(b, .Dvui, extraOptions);
-    zxgDvuiBuild.setupBackend(zxgDvuiModule, .{ .includeArtifacts = true, .linkLibCpp = false });
-
-    const zxgZguiModule = b.addModule("zxg-zgui", .{
-        .root_source_file = b.path("src/zxg-zgui.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    var zxgZguiBuild = getZXGBuild(b, .Zgui, extraOptions);
-    zxgZguiBuild.setupBackend(zxgZguiModule, .{ .includeArtifacts = true, .linkLibCpp = false });
-
-    zxgModule.addImport("zxg-clay", zxgClayModule);
-    zxgModule.addImport("zxg-dvui", zxgDvuiModule);
-    zxgModule.addImport("zxg-zgui", zxgZguiModule);
+    zxgModule.addImport("zxg-" ++ implName, implModule);
+    zxgBuild.setupBackend(implModule, .{ .includeArtifacts = true, .linkLibCpp = false });
 }
