@@ -1,6 +1,6 @@
 # zxg
 
-An XML-based GUI framework for [Zig](https://ziglang.org/).
+An XML-based GUI scaffolding library for [Zig](https://ziglang.org/).
 
 This is currently in experimental phase and is not intended for anyone else than myself to use right now.
 
@@ -8,7 +8,7 @@ The backend uses [Clay](https://github.com/nicbarker/clay) and [Raylib](https://
 
 zxg also uses [zig-xml](https://github.com/nektro/zig-xml) for parsing the XML.
 
-I'm in the process of adding support for [dvui](https://github.com/david-vanderson/dvui/tree/v0.2.0) as a backend.
+I'm in the process of adding support for [dvui](https://github.com/david-vanderson/dvui/tree/v0.2.0) as a backend, as well as [Dear ImGui](https://github.com/ocornut/imgui).
 
 ## Basic Example
 
@@ -65,7 +65,7 @@ fn build(b: *std.Build) void {
 
     ...
 
-    zxg.setup(zxgDep.builder, b, exe, .{
+    zxg.setup(b, exe, .{
         .target = target,
         .optimize = optimize,
         .layoutPath = "layout.xml",
