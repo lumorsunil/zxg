@@ -56,16 +56,13 @@ pub fn build(b: *std.Build) void {
     zxgModule.addOptions("backend", zxgModuleBackendOptions);
 
     var zxgBuild = getZXGBuild(b, backend, extraOptions);
+
     const implName = switch (backend) {
         .Clay => "clay",
         .Dvui => "dvui",
         .Zgui => "zgui",
-        .NotSpecified => {
-            std.log.err("backend not specified", .{});
-            std.process.exit(1);
-        },
+        .NotSpecified => "clay",
     };
-
     const implModule = b.addModule("zxg-" ++ implName, .{
         .root_source_file = b.path("src/zxg-" ++ implName ++ ".zig"),
         .target = target,

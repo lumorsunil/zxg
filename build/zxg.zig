@@ -29,7 +29,8 @@ targetBuild: *std.Build,
 options: ZXGBuildInitOptions,
 //mustacheGen: *Compile,
 xmlGen: *Compile,
-mustacheDep: *Dependency = undefined,
+//mustacheDep: *Dependency = undefined,
+zigXmlDep: *Dependency = undefined,
 clayDep: *Dependency = undefined,
 raylibDep: *Dependency = undefined,
 dvuiDep: *Dependency = undefined,
@@ -55,6 +56,10 @@ pub fn init(b: *std.Build, targetBuild: *std.Build, options: ZXGBuildInitOptions
         //        .mustacheDep = b.dependency("mustache", .{
         //            .target = b.host,
         //        }),
+        .zigXmlDep = b.dependency("zig-xml", .{
+            .target = options.target,
+            .optimize = options.optimize,
+        }),
         .clayDep = if (options.backend == .Clay) b.dependency("clay-zig", .{
             .target = options.target,
             .optimize = options.optimize,
@@ -159,6 +164,7 @@ pub fn setupBackend(self: *ZXGBuild, module: *Module, options: SetupBackendOptio
 
 fn setupXmlGen(self: *ZXGBuild) LazyPath {
     //self.xmlGen.root_module.addAnonymousImport("layout", .{ .root_source_file = self.targetBuild.path(self.options.layoutPath) });
+    self.xmlGen.root_module.addImport("zig-xml", self.zigXmlDep.module("root"));
     self.xmlGen.root_module.addImport("uuid", self.uuidDep.module("uuid"));
 
     self.setupBackend(&self.xmlGen.root_module, .{ .includeArtifacts = true, .linkLibCpp = false });

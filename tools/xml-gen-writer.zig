@@ -1,5 +1,5 @@
 const std = @import("std");
-const xml = @import("zig-xml/mod.zig");
+const xml = @import("zig-xml");
 const uuid = @import("uuid");
 const InterpolationTokenizer = @import("interpolation-tokenizer.zig").InterpolationTokenizer;
 const XmlGenError = @import("xml-gen-error.zig").XmlGenError;

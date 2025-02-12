@@ -1,7 +1,7 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const uuid = @import("uuid");
-const xml = @import("zig-xml/mod.zig");
+const xml = @import("zig-xml");
 const XmlGenError = @import("xml-gen-error.zig").XmlGenError;
 const XmlGenWriter = @import("xml-gen-writer.zig").XmlGenWriter;
 

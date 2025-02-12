@@ -30,6 +30,10 @@
             .url = "https://github.com/raylib-extras/rlImGui/archive/57efef06f69b50ed9ac0834a963a8aefcc59d588.zip",
             .hash = "1220062a93086ea393994481df6555bb31c3bc4604b9feb21a2f89e5c396a865ee25",
         },
+        .@"zig-xml" = .{
+            .url = "git+https://github.com/CoffeeImpliesCode/zig-xml#f7f05ed0f54fb468804470ee85976176fe8eae57",
+            .hash = "1220a08edf49313c4430eae5b3848303a6bbf895c8dd587089c497c188e2e3df41ff",
+        },
     },
     .paths = .{
         "build.zig",
