@@ -223,3 +223,9 @@ pub fn setupNonMainZxgStuff(self: *ZXGBuild, exe: *Compile) void {
 
     self.exeLinkAndAddImports(exe, generatedLayoutModule);
 }
+
+pub fn addIncludePaths(self: *const ZXGBuild, module: *Module) void {
+    module.addIncludePath(self.zguiDep.path("libs/imgui"));
+    module.addIncludePath(self.rlimguiDep.path("."));
+    module.addIncludePath(self.raylibDep.path("src"));
+}

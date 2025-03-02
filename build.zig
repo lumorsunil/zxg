@@ -6,7 +6,7 @@ pub fn setup(
     targetBuild: *std.Build,
     exe: *std.Build.Step.Compile,
     options: ZXGBuild.ZXGBuildInitOptions,
-) void {
+) ZXGBuild {
     const zxgDep = targetBuild.dependency("zxg", .{
         .target = options.target,
         .optimize = options.optimize,
@@ -14,6 +14,7 @@ pub fn setup(
     });
     var zxgBuild = ZXGBuild.init(zxgDep.builder, targetBuild, options);
     zxgBuild.setup(exe);
+    return zxgBuild;
 }
 
 fn getZXGBuildOptions(backend: ZXGBackend, extraOptions: anytype) ZXGBuild.ZXGBuildInitOptions {
