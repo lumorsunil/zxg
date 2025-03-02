@@ -187,12 +187,12 @@ fn createGeneratedLayoutModule(self: *ZXGBuild, xmlGen_output: LazyPath) *Module
     return generatedLayoutModule;
 }
 
-fn exeLinkAndAddImports(self: *ZXGBuild, exe: *Compile, generatedLayoutModule: *Module) void {
-    exe.root_module.addImport(self.options.generatedLayoutImport, generatedLayoutModule);
-    self.setupBackend(&exe.root_module, .{ .includeArtifacts = true, .linkLibCpp = false });
+fn exeLinkAndAddImports(self: *ZXGBuild, exe: *Module, generatedLayoutModule: *Module) void {
+    exe.addImport(self.options.generatedLayoutImport, generatedLayoutModule);
+    self.setupBackend(exe, .{ .includeArtifacts = true, .linkLibCpp = false });
 }
 
-pub fn setup(self: *ZXGBuild, exe: *Compile) void {
+pub fn setup(self: *ZXGBuild, exe: *Module) void {
     //self.mustacheGen.root_module.addImport("mustache", self.mustacheDep.module("mustache"));
     ////self.mustacheGen.root_module.addAnonymousImport("variables", .{ .root_source_file = self.b.path("config/layout-variables.zig") });
     //self.mustacheGen.root_module.addOptions("variables", self.options.mustacheVariables);
@@ -208,18 +208,18 @@ pub fn setup(self: *ZXGBuild, exe: *Compile) void {
     });
     const zxgModule = zxgDep.module("zxg");
     self.setupBackend(zxgModule, .{ .includeArtifacts = true, .linkLibCpp = true });
-    exe.root_module.addImport("zxg", zxgModule);
+    exe.addImport("zxg", zxgModule);
 
     self.setupNonMainZxgStuff(exe);
 }
 
-pub fn setupNonMainZxgStuff(self: *ZXGBuild, exe: *Compile) void {
+pub fn setupNonMainZxgStuff(self: *ZXGBuild, exe: *Module) void {
     const xmlGenOutput = self.setupXmlGen();
     const generatedLayoutModule = self.createGeneratedLayoutModule(xmlGenOutput);
 
-    if (self.options.backend == .Clay) {
-        cl.enableRaylibRenderer(exe, self.clayDep, self.raylibDep);
-    }
+    // if (self.options.backend == .Clay) {
+    //     cl.enableRaylibRenderer(exe, self.clayDep, self.raylibDep);
+    // }
 
     self.exeLinkAndAddImports(exe, generatedLayoutModule);
 }
