@@ -28,12 +28,11 @@ b: *std.Build,
 targetBuild: *std.Build,
 options: ZXGBuildInitOptions,
 //mustacheGen: *Compile,
-xmlGen: *Compile,
+// xmlGen: *Compile,
 //mustacheDep: *Dependency = undefined,
-zigXmlDep: *Dependency = undefined,
-clayDep: *Dependency = undefined,
+// clayDep: *Dependency = undefined,
 raylibDep: *Dependency = undefined,
-dvuiDep: *Dependency = undefined,
+// dvuiDep: *Dependency = undefined,
 zguiDep: *Dependency = undefined,
 rlimguiDep: *Dependency = undefined,
 uuidDep: *Dependency = undefined,
@@ -48,30 +47,26 @@ pub fn init(b: *std.Build, targetBuild: *std.Build, options: ZXGBuildInitOptions
         //            .root_source_file = b.path("tools/mustache-gen.zig"),
         //            .target = b.host,
         //        }),
-        .xmlGen = b.addExecutable(.{
-            .name = "xml-gen",
-            .root_source_file = b.path("tools/xml-gen.zig"),
-            .target = b.host,
-        }),
+        // .xmlGen = b.addExecutable(.{
+        //     .name = "xml-gen",
+        //     .root_source_file = b.path("tools/xml-gen.zig"),
+        //     .target = b.host,
+        // }),
         //        .mustacheDep = b.dependency("mustache", .{
         //            .target = b.host,
         //        }),
-        .zigXmlDep = b.dependency("zig-xml", .{
+        // .clayDep = if (options.backend == .Clay) b.dependency("clay-zig", .{
+        //     .target = options.target,
+        //     .optimize = options.optimize,
+        // }) else undefined,
+        .raylibDep = b.dependency("raylib_zig", .{
             .target = options.target,
             .optimize = options.optimize,
         }),
-        .clayDep = if (options.backend == .Clay) b.dependency("clay-zig", .{
-            .target = options.target,
-            .optimize = options.optimize,
-        }) else undefined,
-        .raylibDep = b.dependency("raylib-zig", .{
-            .target = options.target,
-            .optimize = options.optimize,
-        }),
-        .dvuiDep = if (options.backend == .Dvui) b.dependency("dvui", .{
-            .target = options.target,
-            .optimize = options.optimize,
-        }) else undefined,
+        // .dvuiDep = if (options.backend == .Dvui) b.dependency("dvui", .{
+        //     .target = options.target,
+        //     .optimize = options.optimize,
+        // }) else undefined,
         .zguiDep = if (options.backend == .Zgui) b.dependency("zgui", .{
             .target = options.target,
             .optimize = options.optimize,
@@ -128,14 +123,14 @@ pub fn setupBackend(self: *ZXGBuild, module: *Module, options: SetupBackendOptio
     module.addImport("raygui", self.raylibGuiModule());
 
     switch (self.options.backend) {
-        .Clay => {
-            if (options.includeArtifacts) module.linkLibrary(self.clayDep.artifact("clay"));
-            module.addImport("clay", self.clayModule());
-            module.addImport("clay_renderer", self.clayRendererModule());
-        },
-        .Dvui => {
-            module.addImport("dvui", self.dvuiModule());
-        },
+        // .Clay => {
+        //     if (options.includeArtifacts) module.linkLibrary(self.clayDep.artifact("clay"));
+        //     module.addImport("clay", self.clayModule());
+        //     module.addImport("clay_renderer", self.clayRendererModule());
+        // },
+        // .Dvui => {
+        //     module.addImport("dvui", self.dvuiModule());
+        // },
         .Zgui => {
             if (options.linkLibCpp) {
                 module.link_libcpp = true;
@@ -159,36 +154,36 @@ pub fn setupBackend(self: *ZXGBuild, module: *Module, options: SetupBackendOptio
             module.addIncludePath(self.rlimguiDep.path("."));
         },
         .NotSpecified => {},
+        else => {},
     }
 }
 
-fn setupXmlGen(self: *ZXGBuild) LazyPath {
-    //self.xmlGen.root_module.addAnonymousImport("layout", .{ .root_source_file = self.targetBuild.path(self.options.layoutPath) });
-    self.xmlGen.root_module.addImport("zig-xml", self.zigXmlDep.module("root"));
-    self.xmlGen.root_module.addImport("uuid", self.uuidDep.module("uuid"));
+// fn setupXmlGen(self: *ZXGBuild) LazyPath {
+//     //self.xmlGen.root_module.addAnonymousImport("layout", .{ .root_source_file = self.targetBuild.path(self.options.layoutPath) });
+//     self.xmlGen.root_module.addImport("uuid", self.uuidDep.module("uuid"));
+//
+//     self.setupBackend(&self.xmlGen.root_module, .{ .includeArtifacts = true, .linkLibCpp = false });
+//     self.xmlGen.root_module.addOptions("backend", self.getXmlGenOptions());
+//
+//     const xmlGen_step = self.targetBuild.addRunArtifact(self.xmlGen);
+//     xmlGen_step.addFileArg(self.targetBuild.path(self.options.layoutPath));
+//     return xmlGen_step.addOutputFileArg("generated-layout.zig");
+// }
 
-    self.setupBackend(&self.xmlGen.root_module, .{ .includeArtifacts = true, .linkLibCpp = false });
-    self.xmlGen.root_module.addOptions("backend", self.getXmlGenOptions());
+// fn createGeneratedLayoutModule(self: *ZXGBuild, xmlGen_output: LazyPath) *Module {
+//     const generatedLayoutModule = self.targetBuild.addModule("generated-layout", .{
+//         .root_source_file = xmlGen_output,
+//         .target = self.options.target,
+//         .optimize = self.options.optimize,
+//     });
+//
+//     self.setupBackend(generatedLayoutModule, .{ .includeArtifacts = false, .linkLibCpp = false });
+//
+//     return generatedLayoutModule;
+// }
 
-    const xmlGen_step = self.targetBuild.addRunArtifact(self.xmlGen);
-    xmlGen_step.addFileArg(self.targetBuild.path(self.options.layoutPath));
-    return xmlGen_step.addOutputFileArg("generated-layout.zig");
-}
-
-fn createGeneratedLayoutModule(self: *ZXGBuild, xmlGen_output: LazyPath) *Module {
-    const generatedLayoutModule = self.targetBuild.addModule("generated-layout", .{
-        .root_source_file = xmlGen_output,
-        .target = self.options.target,
-        .optimize = self.options.optimize,
-    });
-
-    self.setupBackend(generatedLayoutModule, .{ .includeArtifacts = false, .linkLibCpp = false });
-
-    return generatedLayoutModule;
-}
-
-fn exeLinkAndAddImports(self: *ZXGBuild, exe: *Module, generatedLayoutModule: *Module) void {
-    exe.addImport(self.options.generatedLayoutImport, generatedLayoutModule);
+fn exeLinkAndAddImports(self: *ZXGBuild, exe: *Module) void {
+    //exe.addImport(self.options.generatedLayoutImport, generatedLayoutModule);
     self.setupBackend(exe, .{ .includeArtifacts = true, .linkLibCpp = false });
 }
 
@@ -214,14 +209,14 @@ pub fn setup(self: *ZXGBuild, exe: *Module) void {
 }
 
 pub fn setupNonMainZxgStuff(self: *ZXGBuild, exe: *Module) void {
-    const xmlGenOutput = self.setupXmlGen();
-    const generatedLayoutModule = self.createGeneratedLayoutModule(xmlGenOutput);
+    //const xmlGenOutput = self.setupXmlGen();
+    //const generatedLayoutModule = self.createGeneratedLayoutModule(xmlGenOutput);
 
     // if (self.options.backend == .Clay) {
     //     cl.enableRaylibRenderer(exe, self.clayDep, self.raylibDep);
     // }
 
-    self.exeLinkAndAddImports(exe, generatedLayoutModule);
+    self.exeLinkAndAddImports(exe);
 }
 
 pub fn addIncludePaths(self: *const ZXGBuild, module: *Module) void {

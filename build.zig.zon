@@ -1,46 +1,29 @@
 .{
-    .name = "zxg",
+    .name = .zxg,
     .version = "0.0.0",
+    .fingerprint = 0x9217339116519834, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.14.1",
     .dependencies = .{
-        .@"clay-zig" = .{
-            .url = "https://github.com/raugl/clay-zig/archive/23dfdafed20ad83189b8372c4c1d61d6a8d5e5f7.zip",
-            .hash = "1220c810bbb8e6aeb37f43953a12baf6acc437163c88500ee91cc47867e9c672b8e9",
-        },
-        .@"raylib-zig" = .{
-            .url = "https://github.com/Not-Nik/raylib-zig/archive/de8c2d458516fc971f0859c4473e3381767d2471.zip",
-            .hash = "122058d3ea6318efb819d0bffba630afd1a459fa3a99b4bfe4b680a937d5de04d2fc",
-        },
-        .mustache = .{
-            .url = "https://github.com/batiati/mustache-zig/archive/5f609d0158f6c5635328ae603b38c351aa15b121.zip",
-            .hash = "12205cc30ed18ea297284eb815e8b5dfa61b57f22ab53762c78a20c042027c05c056",
+        .raylib_zig = .{
+            .url = "git+https://github.com/Not-Nik/raylib-zig#3bf08a304cfe2baf839705063ff999b8d8bc8c54",
+            .hash = "raylib_zig-5.6.0-dev-KE8REKAqBQAQugfCOjYYVRFOi7iaEJK1EMDcRUq8AOm2",
         },
         .uuid = .{
-            .url = "https://github.com/r4gus/uuid-zig/archive/refs/tags/0.2.1.zip",
-            .hash = "1220b4deeb4ec1ec3493ea934905356384561b725dba69d1fbf6a25cb398716dd05b",
-        },
-        .dvui = .{
-            .url = "https://github.com/david-vanderson/dvui/archive/refs/tags/v0.2.0.zip",
-            .hash = "122044e22bc953f8f4653110dcb702653bdd4d43c2284e2868d8ba7c3290dab2bdaf",
-        },
-        .zgui = .{
-            .url = "https://github.com/zig-gamedev/zgui/archive/c16629e67e7bc1bca9a5c67d5123874c75f5374d.zip",
-            .hash = "12202063c813c1b95affa57d83a6a4817d9a4114bd9db052f87740f81b1843ceca09",
+            .url = "git+https://github.com/r4gus/uuid-zig#9d66e23e32cd7208d1becb4fd9352f8a27f89551",
+            .hash = "uuid-0.3.0-oOieIYF1AAA_BtE7FvVqqTn5uEYTvvz7ycuVnalCOf8C",
         },
         .rlimgui = .{
-            .url = "https://github.com/raylib-extras/rlImGui/archive/57efef06f69b50ed9ac0834a963a8aefcc59d588.zip",
-            .hash = "1220062a93086ea393994481df6555bb31c3bc4604b9feb21a2f89e5c396a865ee25",
+            .url = "git+https://github.com/raylib-extras/rlImGui#b35d55ade48f2af579f6a1c22bbf68fe3252caf0",
+            .hash = "N-V-__8AACTQXgAgwqJh8BSZq1IsB6RQWxU1E1Z2KyVMrayV",
         },
-        .@"zig-xml" = .{
-            .url = "git+https://github.com/CoffeeImpliesCode/zig-xml#f7f05ed0f54fb468804470ee85976176fe8eae57",
-            .hash = "1220a08edf49313c4430eae5b3848303a6bbf895c8dd587089c497c188e2e3df41ff",
+        .zgui = .{
+            .url = "git+https://github.com/zig-gamedev/zgui#21dcc288ac5ee70b1fca789d53a06d5c49d51e5e",
+            .hash = "zgui-0.6.0-dev--L6sZKTBaADLHp09LtUUifdfFpsczwbnyH7r2ajfVPuJ",
         },
     },
     .paths = .{
         "build.zig",
         "build.zig.zon",
         "src",
-        "tools",
-        "build",
-        "config",
     },
 }

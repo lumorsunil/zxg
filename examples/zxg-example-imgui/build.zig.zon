@@ -1,7 +1,7 @@
 .{
-    .name = .zxg_example_dvui,
+    .name = .zxg_example_imgui,
     .version = "0.0.0",
-    .fingerprint = 0x2e6a63feff225e8e, // Changing this has security and trust implications.
+    .fingerprint = 0x3a1abd65312b3636, // Changing this has security and trust implications.
     .minimum_zig_version = "0.14.1",
     .dependencies = .{
         .zxg = .{

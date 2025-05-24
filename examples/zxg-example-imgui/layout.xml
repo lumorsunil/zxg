@@ -1,0 +1,12 @@
+<zxg>
+    <body>
+        <container sizing="grow" direction="top-to-bottom" alignment="center-center">
+            <container sizing="grow" alignment="center-center" color="205 175 125 255">
+                <text font-size="48">Hello, world!</text>
+            </container>
+            <container sizing="grow" alignment="top-left" color="150 150 200 255">
+                <text font-size="48">Context: ${context.greeting}</text>
+            </container>
+        </container>
+    </body>
+</zxg>
